@@ -1,0 +1,20 @@
+python <= 3.12
+
+streamlit
+pandas
+numpy
+
+matplotlib
+seaborn
+plotly
+
+keras
+tensorflow
+scikit-learn
+imbalanced-learn
+xgboost
+shap
+streamlit_shap
+joblib
+cloudpickle
+pyngrok
