@@ -33,6 +33,7 @@ import cloudpickle
 import os
 import time
 import requests
+import gdown
 import urllib.request
 from io import StringIO
 from datetime import datetime
@@ -284,7 +285,7 @@ if page == "Analyse exploratoire":
     # -----------------------------
     st.subheader("Carte des stations météo")
     df_map = df[['Location', 'Latitude', 'Longitude', 'Climate']].dropna().drop_duplicates(subset="Location")
-    fig_map = px.scatter_mapbox(
+    fig_map = px.scatter_map(
         df_map,
         lat="Latitude",
         lon="Longitude",
@@ -376,7 +377,7 @@ if page == "Analyse exploratoire":
             "Climate": "first"
         }).reset_index()
 
-        fig_pluie = px.scatter_mapbox(
+        fig_pluie = px.scatter_map(
             df_pluie,
             title = "Pluviométrie moyenne par station",
             lat="Latitude",
@@ -429,7 +430,7 @@ if page == "Analyse exploratoire":
 
           df_map_station = df_station[["Location", "Latitude", "Longitude"]].drop_duplicates()
 
-          fig_mini = px.scatter_mapbox(
+          fig_mini = px.scatter_map(
               df_map_station,
               lat="Latitude",
               lon="Longitude",
@@ -676,7 +677,7 @@ if page == "Analyse exploratoire":
     min_rainfall = df_anim_grouped["Rainfall"].min()
 
     # Carte animée avec échelles fixes
-    fig_anim = px.scatter_mapbox(
+    fig_anim = px.scatter_map(
         df_anim_grouped,
         lat="Latitude",
         lon="Longitude",
