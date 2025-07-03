@@ -33,6 +33,7 @@ import cloudpickle
 import os
 import time
 import requests
+import gdown
 import urllib.request
 from io import StringIO
 from datetime import datetime
@@ -65,10 +66,10 @@ MODEL_LIST_Non_temporel = {
     "XGB Classifier": "XGBClassifier_X_train_model_and_threshold.joblib",
     "RNN": "RNN_ABO_X_scaled_normal_model_and_threshold.joblib"}
 
-#Bypass lfs
-MODEL_URLS = {
-    "Stacking v1": "https://drive.google.com/uc?export=download&id=1blJeynAHvbVDGM_55CGNLdE2OEvayN-u",
-    "Stacking Amélioré": "https://drive.google.com/uc?export=download&id=1guY89tbCJy3s5_t3D30F60e7IHxC2saU"
+#Bypass lfs des fichiers lourds (hébergés sur Drive)
+MODEL_DRIVE_IDS = {
+    "Stacking v1": "1blJeynAHvbVDGM_55CGNLdE2OEvayN-u",
+    "Stacking Amélioré": "1guY89tbCJy3s5_t3D30F60e7IHxC2saU"
 }
 
 # -----------------------------
@@ -106,13 +107,25 @@ def load_old_dataset():#utile en cache? appelé une seule fois
   return X, y
 
 # Cache pour les modèles entrainés
+# Dossier de destination local
+MODEL_CACHE_PATH = "models_from_drive"
+os.makedirs(MODEL_CACHE_PATH, exist_ok=True)
+
+@st.cache_resource(show_spinner="Téléchargement du modèle depuis Google Drive...")
+def load_model_from_drive(model_name):
+    file_id = MODEL_DRIVE_IDS[model_name]
+    output_path = os.path.join(MODEL_CACHE_PATH, f"{model_name.replace(' ', '_')}.pkl")
+    if not os.path.exists(output_path):
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, output_path, quiet=False)
+    with open(output_path, "rb") as f:
+        return pickle.load(f)
+
 @st.cache_resource
 def load_model(name):
-    if name in MODEL_URLS:
-        url = MODEL_URLS[name]
+    if name in MODEL_DRIVE_IDS:
         try:
-            with urllib.request.urlopen(url) as response:
-                return pickle.load(response)
+            return load_model_from_drive(name)
         except Exception as e:
             st.error(f"❌ Erreur lors du chargement depuis Drive ({name}) : {e}")
             return None
@@ -120,9 +133,8 @@ def load_model(name):
         try:
             return joblib.load(os.path.join(MODELS_PATH, MODEL_LIST[name]))
         except FileNotFoundError:
-            st.error(f"❌ Modèle introuvable en local : {MODEL_LIST[name]}")
+            st.error(f"❌ Modèle introuvable : {MODEL_LIST[name]}")
             return None
-
 
 @st.cache_resource
 def load_model_non_temporel(name): #utile en cache? appelé une seule fois
