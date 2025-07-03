@@ -1441,8 +1441,8 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test = st.checkbox("still ok?")
-    if not test :
+    test6 = st.checkbox("still ok6?")
+    if not test6 :
         st.stop()
     #####################
     #####################
@@ -1463,8 +1463,8 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test = st.checkbox("still ok?")
-    if not test :
+    test2 = st.checkbox("still ok2?")
+    if not test2 :
         st.stop()
     #####################
     #####################
@@ -1482,8 +1482,8 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test = st.checkbox("still ok?")
-    if not test :
+    test3 = st.checkbox("still ok?3")
+    if not test3 :
         st.stop()
     #####################
     #####################
@@ -1499,8 +1499,8 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test = st.checkbox("still ok?")
-    if not test :
+    test4 = st.checkbox("still ok?4")
+    if not test4 :
         st.stop()
     #####################
     #####################
@@ -1555,8 +1555,8 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test = st.checkbox("still ok?")
-    if not test :
+    test5 = st.checkbox("still ok?5")
+    if not test5 :
         st.stop()
     #####################
     #####################
