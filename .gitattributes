@@ -1,2 +1,0 @@
-models/stacking_ameliore_25features.pkl filter=lfs diff=lfs merge=lfs -text
-models/stacking_model_25features.pkl filter=lfs diff=lfs merge=lfs -text
