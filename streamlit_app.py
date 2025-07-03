@@ -1436,20 +1436,6 @@ if page == pages[2] :
         return df
     #####-----Fin Fonction----------------------------------------------------------------------------------------------------------------------------------------------------------
     
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test6 = st.checkbox("still ok6?")
-    if not test6 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    
     ##### Application de l'encodage stateless
     df_X_y_test = encode_month(df_X_y_test)
     df_X_y_test = encode_wind_direction(df_X_y_test)
@@ -1475,8 +1461,7 @@ if page == pages[2] :
     #### 3.2.A.6 Complétion des NAN
     #### 3.2.A.6.A Complétion des NAN nuages
     transformer_cloud = load_cloudpickle("cloud_imputer.pkl")
-    X_test_temporel = transformer_cloud.transform(X_test_temporel)
-    
+
     #####################
     #####################
     #####################
@@ -1490,6 +1475,10 @@ if page == pages[2] :
     #####################
     #####################
     #####################
+
+    X_test_temporel = transformer_cloud.transform(X_test_temporel)
+    
+
     #### 3.2.A.6.B Complétion des autres NAN
     transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
     X_test_temporel = transformer.transform(X_test_temporel)
