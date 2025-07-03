@@ -1043,24 +1043,6 @@ if page == pages[2] :
   df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
   df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
 
-
-  #########################
-  ########################
-  ######   TEMP   #########
-  #########################
-  ########################
-  buffer = StringIO()
-  # Afficher les informations du DataFrame dans le buffer   
-  df_conso_station.info(buf=buffer)
-  # Récupérer le contenu du buffer et l'afficher dans Streamlit
-  s = buffer.getvalue()
-  st.text(s)
-  #########################
-  ########################
-  ######   TEMP   #########
-  #########################
-  ########################
-
   ## 2.2 Suprresion 25% des NAN
   # === Calcul du ratio de NaN ===
   total_cells_per_location = df_conso_station.groupby("Location").size() * (df_conso_station.shape[1] - 1)  # -1 car on exclut 'Location'
