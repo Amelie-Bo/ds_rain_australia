@@ -1043,7 +1043,21 @@ if page == pages[2] :
   df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x)
   df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x)
 
-  st.dataframe(df_conso_station.info())
+
+  #########################
+  ########################
+  ######   TEMP   #########
+  #########################
+  ########################
+  buffer = io.StringIO()
+  df_conso_station.info(buf=buffer)
+  s = buffer.getvalue()
+  st.text(s)
+  #########################
+  ########################
+  ######   TEMP   #########
+  #########################
+  ########################
 
   ## 2.2 Suprresion 25% des NAN
   # === Calcul du ratio de NaN ===
@@ -1460,14 +1474,56 @@ if page == pages[2] :
     X_test_temporel = df_X_y_test.drop(columns = ["RainTomorrow"])
     y_test_temporel = df_X_y_test["RainTomorrow"] #pourrait différer cela les suppresions de lignes en NaN (Florent : RainToday)
 
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test = st.checkbox("still ok?")
+    if not test :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+
     #### 3.2.A.6 Complétion des NAN
     #### 3.2.A.6.A Complétion des NAN nuages
     transformer_cloud = load_cloudpickle("cloud_imputer.pkl")
     X_test_temporel = transformer_cloud.transform(X_test_temporel)
-
+    
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test = st.checkbox("still ok?")
+    if not test :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    
     #### 3.2.A.6.B Complétion des autres NAN
     transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
     X_test_temporel = transformer.transform(X_test_temporel)
+    
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test = st.checkbox("still ok?")
+    if not test :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
 
     #### 3.2.A.7 Enrichissement des features
     def amplitude_thermique(X) :
