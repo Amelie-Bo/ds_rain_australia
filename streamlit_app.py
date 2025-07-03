@@ -1043,6 +1043,7 @@ if page == pages[2] :
   df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x)
   df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x)
 
+  st.dataframe(df_conso_station.info())
 
   ## 2.2 Suprresion 25% des NAN
   # === Calcul du ratio de NaN ===
@@ -1436,7 +1437,21 @@ if page == pages[2] :
         # ------------------------------------------------------------------------
         return df
     #####-----Fin Fonction----------------------------------------------------------------------------------------------------------------------------------------------------------
-
+    
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test = st.checkbox("still ok?")
+    if not test :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    
     ##### Application de l'encodage stateless
     df_X_y_test = encode_month(df_X_y_test)
     df_X_y_test = encode_wind_direction(df_X_y_test)
@@ -1495,6 +1510,20 @@ if page == pages[2] :
               X_scaled[cols] = scalers[key].transform(X_scaled[cols])
           return X_scaled
     ####-----Fin Fonction-----------------------------------------------------------------------------------------------------------------------------------------------
+    
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test = st.checkbox("still ok?")
+    if not test :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
 
     # Ajout des features d'ingénierie
     X_test_fe= add_engineered_features(X_test_temporel, ref_year=2007, lat0=-25.0, lon0=133.0)
