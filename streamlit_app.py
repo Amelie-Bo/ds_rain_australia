@@ -1,3 +1,4 @@
+%%writefile streamlit_app.py
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # -----------------------------
@@ -33,6 +34,7 @@ import cloudpickle
 import os
 import time
 import requests
+import urllib.request
 from io import StringIO
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -63,6 +65,12 @@ MODEL_LIST_Non_temporel = {
     "Régression logistique": "LogReg_X_train_normal_model_and_threshold.joblib",
     "XGB Classifier": "XGBClassifier_X_train_model_and_threshold.joblib",
     "RNN": "RNN_ABO_X_scaled_normal_model_and_threshold.joblib"}
+
+#Bypass lfs
+MODEL_URLS = {
+    "Stacking v1": "https://drive.google.com/uc?export=download&id=1blJeynAHvbVDGM_55CGNLdE2OEvayN-u",
+    "Stacking Amélioré": "https://drive.google.com/uc?export=download&id=1guY89tbCJy3s5_t3D30F60e7IHxC2saU"
+}
 
 # -----------------------------
 #  CACHE
@@ -101,11 +109,21 @@ def load_old_dataset():#utile en cache? appelé une seule fois
 # Cache pour les modèles entrainés
 @st.cache_resource
 def load_model(name):
-    try:
-        return joblib.load(os.path.join(MODELS_PATH, MODEL_LIST[name]))
-    except FileNotFoundError:
-        st.error(f"❌ Modèle introuvable : {MODEL_LIST[name]}")
-        return None
+    if name in MODEL_URLS:
+        url = MODEL_URLS[name]
+        try:
+            with urllib.request.urlopen(url) as response:
+                return pickle.load(response)
+        except Exception as e:
+            st.error(f"❌ Erreur lors du chargement depuis Drive ({name}) : {e}")
+            return None
+    else:
+        try:
+            return joblib.load(os.path.join(MODELS_PATH, MODEL_LIST[name]))
+        except FileNotFoundError:
+            st.error(f"❌ Modèle introuvable en local : {MODEL_LIST[name]}")
+            return None
+
 
 @st.cache_resource
 def load_model_non_temporel(name): #utile en cache? appelé une seule fois
@@ -184,7 +202,7 @@ def affichage_resultas_donnees_actuelles (X_test, y, y_pred):
     col2.metric("🌧️ F1", f"{f1:.2f}")
     col3.metric("🌧️ Recall", f"{recall:.2f}")
     col4.metric("🌧️ Precision", f"{precision:.2f}")
-   
+
     st.info("Pour plus de détail ↓")
     with st.expander(" Rapport complet"):
         labels = unique_labels(y, y_pred)
@@ -247,7 +265,7 @@ if page == "Analyse exploratoire":
     - Période : 2007 à 2017
     - Nombre de stations : {:d}
     - Nombre d'observations : {:,}
-    - Nombre de colonnes : {:d} 
+    - Nombre de colonnes : {:d}
     """.format(df['Location'].nunique(), len(df), df.shape[1]-3)) #-3 car a ajouté climat, latitude et longitude dès le chargement du df
 
 
@@ -311,12 +329,12 @@ if page == "Analyse exploratoire":
     # 2.2 Pluviométrie
     # -----------------------------
     with tab2 :
-    
+
       col1, col2 = st.columns([2,3])
 
       # -----------------------------
       # 2.2.1 Pluviométrie mensuelle
-      # -----------------------------  
+      # -----------------------------
       with col1 :
         df_month = df.copy()
         df_month["Month"] = df_month["Date"].dt.month
@@ -367,7 +385,7 @@ if page == "Analyse exploratoire":
     # -----------------------------
     # 3. Analyse par station : Carte de visite : station météo
     # -----------------------------
-    st.divider()  
+    st.divider()
 
     st.subheader("Carte de visite d'une station météo")
 
@@ -392,10 +410,10 @@ if page == "Analyse exploratoire":
 
       with col1:
           st.metric("Climat", df_station["Climate"].mode()[0])
-          
+
           coord = f"{df_station['Latitude'].iloc[0]:.2f}, {df_station['Longitude'].iloc[0]:.2f}"
           st.metric("Coordonnées", coord)
-            
+
       with col2:
           st.markdown("#### Mini-carte de localisation")
 
@@ -421,7 +439,7 @@ if page == "Analyse exploratoire":
           st.plotly_chart(fig_mini, use_container_width=True)
 
     # ----------------------------
-    # Températures 
+    # Températures
     # ----------------------------
     with tab2:
       col1, col2, col3 = st.columns([3,1,1])
@@ -455,7 +473,7 @@ if page == "Analyse exploratoire":
       min_date = df_station.loc[df_station["MinTemp"].idxmin(), "Date"]
       max_temp = df_station["MaxTemp"].max()
       max_date = df_station.loc[df_station["MaxTemp"].idxmax(), "Date"]
-      
+
       col2.metric(label = "❄️ Record Temp. min", value = f"{min_temp:.1f} °C", delta = f"📅 {min_date.date()}", delta_color="off")
       col3.metric(label = "🔥 Record Temp. max", value = f"{max_temp:.1f} °C", delta = f"📅 {max_date.date()}", delta_color="off")
 
@@ -578,7 +596,7 @@ if page == "Analyse exploratoire":
       col1.metric("☁️ Pluviométrie moyenne", f"{mean_rain:.1f} mm")
       col2.metric("📅 Mois le + pluvieux", month_names[max_month])
       col3.metric("📅 Jours le + pluvieux", f"{max_rain:.1f} mm", f"📅 {max_rain_date.date()}",delta_color="off")
-      
+
       # ----------------------------
       # Rang pluviométrie moyenne
       # ----------------------------
@@ -587,7 +605,7 @@ if page == "Analyse exploratoire":
       rank = pluvio_rank[pluvio_rank["Location"] == station].index[0] + 1
       total = pluvio_rank.shape[0]
       st.success(f"La station **{station}** est **{rank}ᵉ** sur {total} pour la pluviométrie moyenne.")
-      
+
       # ----------------------------
       # Évolution des précipitations mensuelles
       # ----------------------------
@@ -610,7 +628,7 @@ if page == "Analyse exploratoire":
     # -----------------------------
     # 4. Carte animée : évolution des précipitations
     # -----------------------------
-    st.divider()  
+    st.divider()
     st.subheader(" Animation des précipitations par station")
 
     # Assure-toi que la colonne Date est bien en datetime
@@ -683,14 +701,14 @@ if page == "Analyse exploratoire":
 
     st.plotly_chart(fig_anim)
 
-  
+
     # -----------------------------
     # 5. Corrélations, distribution des features
     # -----------------------------
-    st.divider() 
+    st.divider()
 
     st.subheader("Analyse des corrélations et distribution des variables")
-    tab1, tab2, tab3 = st.tabs(["📈 Distribution des variables numériques","🔗 Analyse des corrélations", "❓Visualisation des manquants", ])  
+    tab1, tab2, tab3 = st.tabs(["📈 Distribution des variables numériques","🔗 Analyse des corrélations", "❓Visualisation des manquants", ])
 
     # -----------------------------
     # 5.1. Distribution d'une variable
@@ -727,7 +745,7 @@ if page == "Analyse exploratoire":
             # height=400    # fixe une hauteur (optionnel)
         )
 
-      with col2:  
+      with col2:
         # Top corrélations
         st.write("Top 10 des corrélations")
         corr_unstack = corr.unstack()
@@ -760,14 +778,14 @@ if page == "Analyse exploratoire":
       with col2:
         st.markdown("""
     **Remarques :**
-    - Les stations ne commencent pas en même temps (Candberra est seule en 2007) 
+    - Les stations ne commencent pas en même temps (Candberra est seule en 2007)
     - A partir de 2009, toutes les stations émettent (sauf Katherine, Nhil et Ulhuru qui commencent au 1er Mars 2013)
     - Certains mois sont manquants pour toutes les stations""")
 
       # ---------% de Manquants par features --------------------
- 
+
       #Dataframe avec Booleen pour NAN sur toutes les colonnes sauf location
-      df_sans_location= df.drop("Location",axis = 1).iloc[:, :].isna() 
+      df_sans_location= df.drop("Location",axis = 1).iloc[:, :].isna()
       df_col_location =  df.iloc[:, 1:2]
       df_NAN_apres_3e_col= df_col_location .join(df_sans_location)
 
@@ -799,7 +817,7 @@ if page == "Comparaison des modèles":
 
         X_sample = X.sample(sample_size, random_state=42)
         st.info(f"Interprétabilité SHAP sur **{sample_size}** observations")
-        
+
         with st.expander("🧪 Lancer le calcul SHAP et afficher les graphiques", expanded=False):
             if st.button("💥 Calculer SHAP", key="launch_shap"):  # Bouton pour réellement déclencher le calcul
                 with st.spinner("Calcul des valeurs SHAP…"):
@@ -919,7 +937,7 @@ if page == pages[2] :
   st.write("#### Sélection ")
   st.button("🔄 Reset tout", on_click=reset_all) #Pour sélectionner de nouvelles données
   col1, col2 = st.columns(2) # Afficher deux listes déroulantes de sélection multiples : nom des mois, nom des stations
-  
+
   with col1 :
     liste_mois = st.multiselect("Sélectionnez un mois, ou des mois consécutifs", liste_mois_a_selectionner)
     if liste_mois != st.session_state.period_choice:
@@ -1070,8 +1088,8 @@ if page == pages[2] :
   st.write("#### Choix d'une méthode de prévision")
   #Choix par radio bouton entre Logique d'entrainement temporelle ou non
   choix_preprocessing = st.selectbox("Choisir une logique d'entrainement",["---", "temporel", "non-temporel"])
-  
-  if choix_preprocessing != st.session_state.logic_choice: 
+
+  if choix_preprocessing != st.session_state.logic_choice:
     st.session_state.logic_choice = choix_preprocessing
     st.session_state.model_choice = None
     st.session_state.preprocessed_data = None
