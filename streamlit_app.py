@@ -1039,7 +1039,7 @@ if page == pages[2] :
   #-2. Preprocessing de base---------------------------------------------------------------------------------------------------------------------------------
 
   ## 2.1 Modification de la vitesse "Calm" par 0km/h
-  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
   df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x)
   df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x)
 
