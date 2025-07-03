@@ -1039,9 +1039,16 @@ if page == pages[2] :
   #-2. Preprocessing de base---------------------------------------------------------------------------------------------------------------------------------
 
   ## 2.1 Modification de la vitesse "Calm" par 0km/h
-  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x).astype("Int64")#pour gérer les NAN
-  df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x).astype("Int64")
-  df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x).astype("Int64")
+  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindSpeed9am"] = pd.to_numeric(df_conso_station["WindSpeed9am"], errors="coerce").astype("Int64")
+
+  df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindSpeed3pm"] = pd.to_numeric(df_conso_station["WindSpeed3pm"], errors="coerce").astype("Int64")
+
+  df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindGustSpeed"] = pd.to_numeric(df_conso_station["WindGustSpeed"], errors="coerce").astype("Int64")
+
+
 
   ## 2.2 Suprresion 25% des NAN
   # === Calcul du ratio de NaN ===
@@ -1444,20 +1451,6 @@ if page == pages[2] :
     X_test_temporel = df_X_y_test.drop(columns = ["RainTomorrow"])
     y_test_temporel = df_X_y_test["RainTomorrow"] #pourrait différer cela les suppresions de lignes en NaN (Florent : RainToday)
 
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test2 = st.checkbox("still ok2?")
-    if not test2 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-
     #### 3.2.A.6 Complétion des NAN
     #### 3.2.A.6.A Complétion des NAN nuages
     transformer_cloud = load_cloudpickle("cloud_imputer.pkl")
@@ -1477,10 +1470,35 @@ if page == pages[2] :
     #####################
 
     X_test_temporel = transformer_cloud.transform(X_test_temporel)
-    
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test1 = st.checkbox("still ok?1")
+    if not test1 :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################    
 
     #### 3.2.A.6.B Complétion des autres NAN
     transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################
+    test2 = st.checkbox("still ok?2")
+    if not test2 :
+        st.stop()
+    #####################
+    #####################
+    #####################
+    #####################
+    #####################   
     X_test_temporel = transformer.transform(X_test_temporel)
     
     #####################
