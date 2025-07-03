@@ -1039,9 +1039,27 @@ if page == pages[2] :
   #-2. Preprocessing de base---------------------------------------------------------------------------------------------------------------------------------
 
   ## 2.1 Modification de la vitesse "Calm" par 0km/h
-  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
-  df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
-  df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x).astype(int)
+  df_conso_station["WindSpeed9am"] = df_conso_station["WindSpeed9am"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindSpeed3pm"] = df_conso_station["WindSpeed3pm"].apply(lambda x: 0 if x =="Calm" else x)
+  df_conso_station["WindGustSpeed"] = df_conso_station["WindGustSpeed"].apply(lambda x: 0 if x =="Calm" else x)
+
+
+  #########################
+  ########################
+  ######   TEMP   #########
+  #########################
+  ########################
+  buffer = StringIO()
+  # Afficher les informations du DataFrame dans le buffer   
+  df_conso_station.info(buf=buffer)
+  # Récupérer le contenu du buffer et l'afficher dans Streamlit
+  s = buffer.getvalue()
+  st.text(s)
+  #########################
+  ########################
+  ######   TEMP   #########
+  #########################
+  ########################
 
   ## 2.2 Suprresion 25% des NAN
   # === Calcul du ratio de NaN ===
@@ -1490,7 +1508,6 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-
     #### 3.2.A.6.B Complétion des autres NAN
     transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
     X_test_temporel = transformer.transform(X_test_temporel)
