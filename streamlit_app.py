@@ -114,24 +114,29 @@ def download_file_from_google_drive(file_id, destination):
 
     response = session.get(URL, params={'id': file_id}, stream=True)
     token = None
-    for key, value in response.cookies.items():
+    for key, value in response.cookies.items():   # Chercher le token de confirmation dans le contenu HTML si présent
         if key.startswith('download_warning'):
             token = value
+            break
     if token:
         params = {'id': file_id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
-    with open(destination, "wb") as f:
+    with open(destination, "wb") as f: # Écrire le contenu dans le fichier
         for chunk in response.iter_content(32768):
             if chunk:
                 f.write(chunk)
-# Téléchargement et chargement du modèle depuis Drive
+
 @st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
 def load_model_from_drive(model_name):
     file_id = MODEL_DRIVE_IDS[model_name]
-    filename = MODEL_LIST[model_name]  # garde le nom original (pkl)
+    filename = MODEL_LIST[model_name]
     output_path = os.path.join(MODEL_CACHE_PATH, filename)
     if not os.path.exists(output_path):
         download_file_from_google_drive(file_id, output_path)
+    with open(output_path, "rb") as f: # Vérifie que ce n'est pas un fichier HTML par erreur
+        start = f.read(10)
+        if start.startswith(b'<html') or start.startswith(b'<!DOCTYPE'):
+            raise ValueError("Fichier téléchargé est une page HTML, pas un pickle valide. Vérifie les permissions Drive et le lien.")
     with open(output_path, "rb") as f:
         return pickle.load(f)
 #---- Contournement pour pb lfs-------#
