@@ -1,4 +1,3 @@
-%%writefile streamlit_app.py
 # -----------------------------
 # Chargement des librairies
 # -----------------------------
@@ -32,8 +31,6 @@ import cloudpickle
 import os
 import time
 import requests
-import gdown
-import urllib.request
 from io import StringIO
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
