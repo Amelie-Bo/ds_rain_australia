@@ -13,9 +13,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from sklearn.preprocessing import LabelEncoder
 from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import (accuracy_score, f1_score, classification_report, roc_auc_score, confusion_matrix, ConfusionMatrixDisplay,
+from sklearn.metrics import (accuracy_score, f1_score, classification_report, roc_auc_score, confusion_matrix, 
                              roc_curve, recall_score, precision_score)
 from sklearn.utils.multiclass import unique_labels
 
@@ -30,6 +29,7 @@ import cloudpickle
 
 import os
 import time
+import gdown
 import requests
 from io import StringIO
 from datetime import datetime
@@ -64,7 +64,7 @@ MODEL_LIST_Non_temporel = {
 
 #Bypass lfs des fichiers lourds (hébergés sur Drive)
 MODEL_DRIVE_IDS = {
-    "Stacking v1": "1AIk-4homf4imEsVIGSyQQrWzvIRb4I-O",
+    "Stacking v1": "1AIk-4homf4imEsVIGSyQQrWzvIRb4I-O", #.zip
     "Stacking Amélioré": "1G_A-ThUUeY8Po0kufP5shr-lpQvk9_56"
 }
 
@@ -109,28 +109,29 @@ MODEL_CACHE_PATH = "models_from_drive"
 os.makedirs(MODEL_CACHE_PATH, exist_ok=True)
 
 def download_file_from_google_drive(file_id, destination):
-    URL = "https://docs.google.com/uc?export=download"
-    session = requests.Session()
+@st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
+def download_and_load_model(model_name):
+    file_id = MODEL_DRIVE_IDS[model_name]
+    filename = MODEL_LIST[model_name]
+    output_path = os.path.join(MODEL_CACHE_PATH, filename)
 
-    response = session.get(URL, params={'id': file_id}, stream=True)
-    token = None
-    for key, value in response.cookies.items():   # Chercher le token de confirmation dans le contenu HTML si présent
-        if key.startswith('download_warning'):
-            token = value
-            break
-    if token:
-        params = {'id': file_id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-    with open(destination, "wb") as f: # Écrire le contenu dans le fichier
-        for chunk in response.iter_content(32768):
-            if chunk:
-                f.write(chunk)
-    # Vérifie si c'est une page HTML déguisée
-    with open(destination, "rb") as f:
-        head = f.read(2048)
-        if b"<html" in head or b"<!DOCTYPE html" in head:
-            os.remove(destination)
-            raise ValueError("Fichier téléchargé = page HTML (pas un modèle). Vérifie le lien / permissions Drive.")
+    if not os.path.exists(output_path):
+        tmp_download_path = os.path.join(MODEL_CACHE_PATH, f"{model_name}.dl")
+
+        # Téléchargement
+        url = f"https://drive.google.com/uc?id={file_id}"
+        gdown.download(url, tmp_download_path, quiet=False)
+
+        # Décompression si c'est un .zip
+        if tmp_download_path.endswith(".zip"):
+            import zipfile
+            with zipfile.ZipFile(tmp_download_path, 'r') as zip_ref:
+                zip_ref.extractall(MODEL_CACHE_PATH)
+            os.remove(tmp_download_path)
+        else:
+            os.rename(tmp_download_path, output_path)
+    return joblib.load(output_path)
+
 
 
 @st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
@@ -140,7 +141,7 @@ def load_model_from_drive(model_name):
     output_path = os.path.join(MODEL_CACHE_PATH, filename)
 
     if not os.path.exists(output_path):
-        download_file_from_google_drive(file_id, output_path)
+        download_and_load_model(file_id, output_path)
 
     try:
         if filename.endswith(".joblib"):
