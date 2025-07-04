@@ -125,6 +125,13 @@ def download_file_from_google_drive(file_id, destination):
         for chunk in response.iter_content(32768):
             if chunk:
                 f.write(chunk)
+    # Vérifie si c'est une page HTML déguisée
+    with open(destination, "rb") as f:
+        head = f.read(2048)
+        if b"<html" in head or b"<!DOCTYPE html" in head:
+            os.remove(destination)
+            raise ValueError("Fichier téléchargé = page HTML (pas un modèle). Vérifie le lien / permissions Drive.")
+
 
 @st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
 def load_model_from_drive(model_name):
@@ -135,14 +142,14 @@ def load_model_from_drive(model_name):
     if not os.path.exists(output_path):
         download_file_from_google_drive(file_id, output_path)
 
-    # Vérifie que ce n'est pas une page HTML (souvent erreur Drive)
-    with open(output_path, "rb") as f:
-        start = f.read(1024)
-        if b'<html' in start or b'<!DOCTYPE' in start:
-            raise ValueError("Fichier téléchargé = page HTML (pas un modèle). Vérifie le lien / permissions Drive.")
-
-    # Recharge depuis zéro avec joblib
-    return joblib.load(output_path)
+    try:
+        if filename.endswith(".joblib"):
+            return joblib.load(output_path)
+        else:
+            with open(output_path, "rb") as f:
+                return pickle.load(f)
+    except Exception as e:
+        raise RuntimeError(f"Erreur de chargement du fichier : {e}")
 #---- Contournement pour pb lfs-------#
 
 @st.cache_resource
