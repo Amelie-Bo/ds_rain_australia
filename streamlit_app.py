@@ -131,14 +131,18 @@ def load_model_from_drive(model_name):
     file_id = MODEL_DRIVE_IDS[model_name]
     filename = MODEL_LIST[model_name]
     output_path = os.path.join(MODEL_CACHE_PATH, filename)
+
     if not os.path.exists(output_path):
         download_file_from_google_drive(file_id, output_path)
-    with open(output_path, "rb") as f: # Vérifie que ce n'est pas un fichier HTML par erreur
-        start = f.read(10)
-        if start.startswith(b'<html') or start.startswith(b'<!DOCTYPE'):
-            raise ValueError("Fichier téléchargé est une page HTML, pas un pickle valide. Vérifie les permissions Drive et le lien.")
+
+    # Vérifie que ce n'est pas une page HTML (souvent erreur Drive)
     with open(output_path, "rb") as f:
-        return pickle.load(f)
+        start = f.read(1024)
+        if b'<html' in start or b'<!DOCTYPE' in start:
+            raise ValueError("Fichier téléchargé = page HTML (pas un modèle). Vérifie le lien / permissions Drive.")
+
+    # Recharge depuis zéro avec joblib
+    return joblib.load(output_path)
 #---- Contournement pour pb lfs-------#
 
 @st.cache_resource
