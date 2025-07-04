@@ -1,5 +1,4 @@
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-#---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+%%writefile streamlit_app.py
 # -----------------------------
 # Chargement des librairies
 # -----------------------------
@@ -107,19 +106,38 @@ def load_old_dataset():#utile en cache? appelé une seule fois
   return X, y
 
 # Cache pour les modèles entrainés
+#---- Contournement pour pb lfs via Drive-------#
 # Dossier de destination local
 MODEL_CACHE_PATH = "models_from_drive"
 os.makedirs(MODEL_CACHE_PATH, exist_ok=True)
 
-@st.cache_resource(show_spinner="Téléchargement du modèle depuis Google Drive...")
+def download_file_from_google_drive(file_id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+
+    response = session.get(URL, params={'id': file_id}, stream=True)
+    token = None
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+    if token:
+        params = {'id': file_id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+# Téléchargement et chargement du modèle depuis Drive
+@st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
 def load_model_from_drive(model_name):
     file_id = MODEL_DRIVE_IDS[model_name]
-    output_path = os.path.join(MODEL_CACHE_PATH, f"{model_name.replace(' ', '_')}.pkl")
+    filename = MODEL_LIST[model_name]  # garde le nom original (pkl)
+    output_path = os.path.join(MODEL_CACHE_PATH, filename)
     if not os.path.exists(output_path):
-        url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, output_path, quiet=False)
+        download_file_from_google_drive(file_id, output_path)
     with open(output_path, "rb") as f:
         return pickle.load(f)
+#---- Contournement pour pb lfs-------#
 
 @st.cache_resource
 def load_model(name):
@@ -1469,7 +1487,7 @@ if page == pages[2] :
     #####################
     #####################
 
-    X_test_temporel = transformer_cloud.transform(X_test_temporel)
+    # X_test_temporel = transformer_cloud.transform(X_test_temporel)
     #####################
     #####################
     #####################
