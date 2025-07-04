@@ -1552,19 +1552,6 @@ if page == pages[2] :
     default_threshold = 0.5 #revient à faire model.predict(X)
 
   seuil = st.slider("🎯 Seuil de décision (classification)", 0.0, 1.0, step=0.01, value=default_threshold, key="seuil_slider")
-  
-  #temporaire
-  st.write(f"Type du modèle chargé : {type(model)}")
-  #temporaire
-  if model is not None:
-    proba = model.predict_proba(X)[:, 1]
-    y_pred = (proba >= seuil).astype(int)
-    affichage_resultas_donnees_actuelles(X, y, y_pred)
-  else:
-      st.error("Le modèle n'est pas chargé. Veuillez vérifier le chargement du modèle.")
- 
-
-  
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
