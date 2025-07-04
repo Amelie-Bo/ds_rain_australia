@@ -305,7 +305,7 @@ if page == "Analyse exploratoire":
     # -----------------------------
     st.subheader("Carte des stations météo")
     df_map = df[['Location', 'Latitude', 'Longitude', 'Climate']].dropna().drop_duplicates(subset="Location")
-    fig_map = px.scatter_map(
+    fig_map = px.scatter_mapbox(
         df_map,
         lat="Latitude",
         lon="Longitude",
@@ -397,7 +397,7 @@ if page == "Analyse exploratoire":
             "Climate": "first"
         }).reset_index()
 
-        fig_pluie = px.scatter_map(
+        fig_pluie = px.scatter_mapbox(
             df_pluie,
             title = "Pluviométrie moyenne par station",
             lat="Latitude",
@@ -450,7 +450,7 @@ if page == "Analyse exploratoire":
 
           df_map_station = df_station[["Location", "Latitude", "Longitude"]].drop_duplicates()
 
-          fig_mini = px.scatter_map(
+          fig_mini = px.scatter_mapbox(
               df_map_station,
               lat="Latitude",
               lon="Longitude",
@@ -697,7 +697,7 @@ if page == "Analyse exploratoire":
     min_rainfall = df_anim_grouped["Rainfall"].min()
 
     # Carte animée avec échelles fixes
-    fig_anim = px.scatter_map(
+    fig_anim = px.scatter_mapbox(
         df_anim_grouped,
         lat="Latitude",
         lon="Longitude",
