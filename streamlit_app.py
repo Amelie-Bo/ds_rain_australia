@@ -1480,7 +1480,7 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test3 = st.checkbox("still ok?3")
+    test3 = st.checkbox("chargement load_cloudpickle cloud imputer ok.continuer?")
     if not test3 :
         st.stop()
     #####################
@@ -1490,19 +1490,6 @@ if page == pages[2] :
     #####################
 
     # X_test_temporel = transformer_cloud.transform(X_test_temporel)
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test1 = st.checkbox("still ok?1")
-    if not test1 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################    
 
     #### 3.2.A.6.B Complétion des autres NAN
     transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
@@ -1511,7 +1498,7 @@ if page == pages[2] :
     #####################
     #####################
     #####################
-    test2 = st.checkbox("still ok?2")
+    test2 = st.checkbox("chargement load_cloudpickle trasnformeKNNI.continuer?2")
     if not test2 :
         st.stop()
     #####################
