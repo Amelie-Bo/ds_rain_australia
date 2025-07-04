@@ -30,6 +30,7 @@ import cloudpickle
 import os
 import time
 import gdown
+import shutil
 import requests
 from io import StringIO
 from datetime import datetime
@@ -64,9 +65,8 @@ MODEL_LIST_Non_temporel = {
 
 #Bypass lfs des fichiers lourds (hébergés sur Drive)
 MODEL_DRIVE_IDS = {
-    "Stacking v1": "1GJS4yOYacNl11LW2iYdl-CxbCZp20-Fm", #.zip
-    "Stacking Amélioré": "1G_A-ThUUeY8Po0kufP5shr-lpQvk9_56"
-}
+    "Stacking v1": "1GJS4yOYacNl11LW2iYdl-CxbCZp20-Fm", 
+    "Stacking Amélioré": "1rls8lh-lmxXobn1sN9xW6CFwPZIxDs9w"}
 
 # -----------------------------
 #  CACHE
@@ -108,46 +108,39 @@ def load_old_dataset():#utile en cache? appelé une seule fois
 MODEL_CACHE_PATH = "models_from_drive"
 os.makedirs(MODEL_CACHE_PATH, exist_ok=True)
 
-@st.cache_resource()
-def download_and_load_model(model_name):
+@st.cache_resource(show_spinner="📥 Téléchargement du modèle depuis Google Drive...")
+def load_model_from_drive(model_name):
     file_id = MODEL_DRIVE_IDS[model_name]
-    filename = MODEL_LIST[model_name]
-    output_path = os.path.join(MODEL_CACHE_PATH, filename)
+    expected_model_filename = MODEL_LIST[model_name]
+    zip_filename = f"{model_name}.zip"
+    zip_path = os.path.join(MODEL_CACHE_PATH, zip_filename)
 
-    if not os.path.exists(output_path):
-        tmp_download_path = os.path.join(MODEL_CACHE_PATH, f"{model_name}.dl")
-
-        # Téléchargement
+    # 1. Télécharger .zip
+    if not os.path.exists(zip_path):
         url = f"https://drive.google.com/uc?id={file_id}"
-        gdown.download(url, tmp_download_path, quiet=False)
+        gdown.download(url, zip_path, quiet=False)
 
-        # Décompression si c'est un .zip
-        if tmp_download_path.endswith(".zip"):
-            import zipfile
-            with zipfile.ZipFile(tmp_download_path, 'r') as zip_ref:
-                zip_ref.extractall(MODEL_CACHE_PATH)
-            os.remove(tmp_download_path)
-        else:
-            os.rename(tmp_download_path, output_path)
+    # 2. Extraire
+    extract_path = os.path.join(MODEL_CACHE_PATH, model_name.replace(" ", "_"))
+    if not os.path.exists(extract_path):
+        shutil.unpack_archive(zip_path, extract_path)
 
-    # Chargement du modèle (joblib si possible)
-    return joblib.load(output_path)
-
+    # 3. Charger avec joblib
+    model_path = os.path.join(extract_path, expected_model_filename)
+    return joblib.load(model_path)
 
 @st.cache_resource
 def load_model(name):
-    if name in MODEL_DRIVE_IDS:
-        try:
-            return download_and_load_model(name)
-        except Exception as e:
-            st.error(f"❌ Erreur lors du chargement depuis Drive ({name}) : {e}")
-            return None
-    else:
-        try:
-            return joblib.load(os.path.join(MODELS_PATH, MODEL_LIST[name]))
-        except FileNotFoundError:
-            st.error(f"❌ Modèle introuvable localement : {MODEL_LIST[name]}")
-            return None
+    try:
+        if name in MODEL_DRIVE_IDS:
+            return load_model_from_drive(name)
+        else:
+            local_path = os.path.join("models", MODEL_LIST[name])
+            return joblib.load(local_path)
+    except Exception as e:
+        st.error(f"❌ Erreur lors du chargement du modèle ({name}) : {e}")
+        return None
+
         
 @st.cache_resource
 def load_model_non_temporel(name): #utile en cache? appelé une seule fois
