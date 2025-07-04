@@ -64,8 +64,8 @@ MODEL_LIST_Non_temporel = {
 
 #Bypass lfs des fichiers lourds (hébergés sur Drive)
 MODEL_DRIVE_IDS = {
-    "Stacking v1": "1blJeynAHvbVDGM_55CGNLdE2OEvayN-u",
-    "Stacking Amélioré": "1guY89tbCJy3s5_t3D30F60e7IHxC2saU"
+    "Stacking v1": "1AIk-4homf4imEsVIGSyQQrWzvIRb4I-O",
+    "Stacking Amélioré": "1G_A-ThUUeY8Po0kufP5shr-lpQvk9_56"
 }
 
 # -----------------------------
