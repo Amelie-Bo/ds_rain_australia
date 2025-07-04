@@ -20,7 +20,8 @@ from sklearn.utils.multiclass import unique_labels
 
 from imblearn.metrics import classification_report_imbalanced
 import xgboost as xgb
-import keras
+
+import keras.ops as K
 from keras.models import load_model as keras_load_model
 
 import shap
@@ -130,7 +131,25 @@ def load_model_from_drive(model_name):
     # 3. Charger avec joblib
     model_path = os.path.join(extract_path, expected_model_filename)
     return joblib.load(model_path)
+######### pour le modele RNN, une fonction local_loss est a definir
+def focal_loss(gamma=2.0, alpha=0.25):
+    EPSILON = 1e-7 # pour éviter log(0)
+    def loss(y_true, y_pred):
+        y_pred = K.clip(y_pred, EPSILON, 1.0 - EPSILON)
 
+        cross_entropy = - y_true * K.log(y_pred) - (1 - y_true) * K.log(1 - y_pred)
+        
+        weight_pos = K.multiply(alpha, K.power(K.subtract(1.0, y_pred), gamma))
+        weight_pos = K.multiply(weight_pos, y_true)
+        
+        weight_neg = K.multiply(1.0 - alpha, K.power(y_pred, gamma))
+        weight_neg = K.multiply(weight_neg, K.subtract(1.0, y_true))
+        
+        weight = K.add(weight_pos, weight_neg)
+        
+        return K.mean(K.multiply(weight, cross_entropy), axis=-1)
+    return loss
+################# fin fonction Keras focal_loss ##########
 @st.cache_resource
 def load_model(name):
     try:
