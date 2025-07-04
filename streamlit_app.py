@@ -20,6 +20,8 @@ from sklearn.utils.multiclass import unique_labels
 
 from imblearn.metrics import classification_report_imbalanced
 import xgboost as xgb
+import keras
+from keras.models import load_model as keras_load_model
 
 import shap
 
@@ -56,7 +58,7 @@ MODEL_LIST = {
     "Stacking Amélioré": "stacking_ameliore_25features.pkl",
     "Stacking Simple": "stacking_simple_model.pkl",
     "Voting Classifier": "voting_model_25features.pkl",
-    "RNN" : "RNN_time_X_reduit_time_model_and_threshold.joblib",
+    "RNN" : "RNN_time_model.keras",
 }
 
 MODEL_LIST_Non_temporel = {
@@ -134,9 +136,12 @@ def load_model(name):
     try:
         if name in MODEL_DRIVE_IDS:
             return load_model_from_drive(name)
-        else:
-            local_path = os.path.join("models", MODEL_LIST[name])
-            return joblib.load(local_path)
+        else :
+           local_path = os.path.join(MODELS_PATH, MODEL_LIST[name])
+           if name == "RNN": # Pour le modèle RNN, on utilise Keras
+                return keras_load_model(local_path, custom_objects={"loss": focal_loss(gamma=2.0, alpha=0.25)})
+           else :
+                return joblib.load(local_path)
     except Exception as e:
         st.error(f"❌ Erreur lors du chargement du modèle ({name}) : {e}")
         return None
@@ -1547,7 +1552,7 @@ if page == pages[2] :
   if choix_preprocessing == "temporel" and  choix_model_temporel == "XGBoost Final":
     default_threshold = 0.38
   elif choix_preprocessing == "non-temporel" :
-    default_threshold = best_threshold
+    default_threshold = load_model("RNN_time_threshold.joblib")
   else :
     default_threshold = 0.5 #revient à faire model.predict(X)
 
