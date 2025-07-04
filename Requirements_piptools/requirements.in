@@ -1,20 +1,17 @@
-python <= 3.12
-
 streamlit
 pandas
 numpy
-
+scipy
 matplotlib
 seaborn
-plotly
-
-keras
-tensorflow
+plotly>= 6.0.0
 scikit-learn
 imbalanced-learn
 xgboost
-shap
-streamlit_shap
+lightgbm
 joblib
+shap
 cloudpickle
-pyngrok
+requests
+python-dateutil
+keras

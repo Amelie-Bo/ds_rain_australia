@@ -54,13 +54,13 @@ MODEL_LIST = {
     "Stacking v1": "stacking_model_25features.pkl",
     "Stacking Amélioré": "stacking_ameliore_25features.pkl",
     "Stacking Simple": "stacking_simple_model.pkl",
-    "Voting Classifier": "voting_model_25features.pkl"
+    "Voting Classifier": "voting_model_25features.pkl",
+    "RNN" : "RNN_time_X_reduit_time_model_and_threshold.joblib",
 }
 
 MODEL_LIST_Non_temporel = {
     "Régression logistique": "LogReg_X_train_normal_model_and_threshold.joblib",
-    "XGB Classifier": "XGBClassifier_X_train_model_and_threshold.joblib",
-    "RNN": "RNN_ABO_X_scaled_normal_model_and_threshold.joblib"}
+    "XGB Classifier": "XGBClassifier_X_train_model_and_threshold.joblib"}
 
 #Bypass lfs des fichiers lourds (hébergés sur Drive)
 MODEL_DRIVE_IDS = {
@@ -1325,7 +1325,7 @@ if page == pages[2] :
       st.stop()
 
     ### 3.2.A Preprocessing Amelie------------------------------------------------------------------------------------------------------------------------------------------------
-    do_preprocess_abo = st.checkbox("Lancer preprocessing, prédictions puis évaluation")
+    do_preprocess_abo = st.checkbox("Lancer le preprocessing, la prédiction et l'évaluation du modèle")
     if not do_preprocess_abo :
         st.stop()
 
@@ -1474,53 +1474,12 @@ if page == pages[2] :
     #### 3.2.A.6 Complétion des NAN
     #### 3.2.A.6.A Complétion des NAN nuages
     transformer_cloud = load_cloudpickle("cloud_imputer.pkl")
-
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test3 = st.checkbox("chargement load_cloudpickle cloud imputer ok.continuer?")
-    if not test3 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-
-    # X_test_temporel = transformer_cloud.transform(X_test_temporel)
+    X_test_temporel = transformer_cloud.transform(X_test_temporel)
 
     #### 3.2.A.6.B Complétion des autres NAN
-    transformer = load_cloudpickle("transformer_KNNImputerABO.pkl")
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test2 = st.checkbox("chargement load_cloudpickle trasnformeKNNI.continuer?2")
-    if not test2 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################   
+    transformer = load_cloudpickle("transformer_KNNImputerABO.pkl") 
     X_test_temporel = transformer.transform(X_test_temporel)
-    
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test4 = st.checkbox("still ok?4")
-    if not test4 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
+
 
     #### 3.2.A.7 Enrichissement des features
     def amplitude_thermique(X) :
@@ -1563,20 +1522,6 @@ if page == pages[2] :
               X_scaled[cols] = scalers[key].transform(X_scaled[cols])
           return X_scaled
     ####-----Fin Fonction-----------------------------------------------------------------------------------------------------------------------------------------------
-    
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
-    test5 = st.checkbox("still ok?5")
-    if not test5 :
-        st.stop()
-    #####################
-    #####################
-    #####################
-    #####################
-    #####################
 
     # Ajout des features d'ingénierie
     X_test_fe= add_engineered_features(X_test_temporel, ref_year=2007, lat0=-25.0, lon0=133.0)
