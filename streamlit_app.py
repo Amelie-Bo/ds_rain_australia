@@ -58,8 +58,7 @@ MODEL_LIST = {
     "Stacking v1": "stacking_model_25features.pkl",
     "Stacking Amélioré": "stacking_ameliore_25features.pkl",
     "Stacking Simple": "stacking_simple_model.pkl",
-    "Voting Classifier": "voting_model_25features.pkl",
-    "RNN" : "RNN_time_model.keras",
+    "Voting Classifier": "voting_model_25features.pkl"
 }
 
 MODEL_LIST_Non_temporel = {
@@ -131,25 +130,7 @@ def load_model_from_drive(model_name):
     # 3. Charger avec joblib
     model_path = os.path.join(extract_path, expected_model_filename)
     return joblib.load(model_path)
-######### pour le modele RNN, une fonction local_loss est a definir
-def focal_loss(gamma=2.0, alpha=0.25):
-    EPSILON = 1e-7 # pour éviter log(0)
-    def loss(y_true, y_pred):
-        y_pred = K.clip(y_pred, EPSILON, 1.0 - EPSILON)
 
-        cross_entropy = - y_true * K.log(y_pred) - (1 - y_true) * K.log(1 - y_pred)
-        
-        weight_pos = K.multiply(alpha, K.power(K.subtract(1.0, y_pred), gamma))
-        weight_pos = K.multiply(weight_pos, y_true)
-        
-        weight_neg = K.multiply(1.0 - alpha, K.power(y_pred, gamma))
-        weight_neg = K.multiply(weight_neg, K.subtract(1.0, y_true))
-        
-        weight = K.add(weight_pos, weight_neg)
-        
-        return K.mean(K.multiply(weight, cross_entropy), axis=-1)
-    return loss
-################# fin fonction Keras focal_loss ##########
 @st.cache_resource
 def load_model(name):
     try:
@@ -157,10 +138,7 @@ def load_model(name):
             return load_model_from_drive(name)
         else :
            local_path = os.path.join(MODELS_PATH, MODEL_LIST[name])
-           if name == "RNN": # Pour le modèle RNN, on utilise Keras
-                return keras_load_model(local_path, custom_objects={"loss": focal_loss(gamma=2.0, alpha=0.25)})
-           else :
-                return joblib.load(local_path)
+           return joblib.load(local_path)
     except Exception as e:
         st.error(f"❌ Erreur lors du chargement du modèle ({name}) : {e}")
         return None
@@ -1570,8 +1548,6 @@ if page == pages[2] :
   # Initialisation du slider du seuil
   if choix_preprocessing == "temporel" and  choix_model_temporel == "XGBoost Final":
     default_threshold = 0.38
-  elif choix_preprocessing == "non-temporel" :
-    default_threshold = load_model("RNN_time_threshold.joblib")
   else :
     default_threshold = 0.5 #revient à faire model.predict(X)
 
