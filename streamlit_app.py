@@ -893,16 +893,6 @@ if page == "Comparaison des modèles":
 # -----------------------------
 
 # -----------------------------
-# 0. Cache dans la page
-def reset_all():
-    st.session_state.period_choice = []
-    st.session_state.stations_choice = []
-    st.session_state.logic_choice = "---"
-    st.session_state.model_choice = "--- Sélectionner ---"
-    st.session_state.preprocessed_data = None
-    st.rerun()
-# -----------------------------
-
 if page == pages[2] :
   st.subheader("📡 Classification en temps réel sur les données actuelles du BOM")
 #-1. Collecte des données actuelles---------------------------------------------------------------------------------------------------------------------------------
@@ -940,23 +930,16 @@ if page == pages[2] :
 
   # 1.2 Saisie utilisateur
   st.write("#### Sélection ")
-  st.button("🔄 Reset tout", on_click=reset_all) #Pour sélectionner de nouvelles données
   col1, col2 = st.columns(2) # Afficher deux listes déroulantes de sélection multiples : nom des mois, nom des stations
 
   with col1 :
     liste_mois = st.multiselect("Sélectionnez un mois, ou des mois consécutifs", liste_mois_a_selectionner)
-    if liste_mois != st.session_state.period_choice:
-      st.session_state.period_choice = liste_mois
-      st.session_state.preprocessed_data = None  # Invalide l’ancien preprocessing
 
   with col2 : # Multiselect avec affichage du nom de la station
     stations_selectionnees = st.multiselect(
         "Sélectionnez une ou plusieurs stations",
         options=list(dico_stations_BOM.keys()),
         format_func=lambda x: dico_stations_BOM[x][2])
-    if stations_selectionnees != st.session_state.stations_choice:
-      st.session_state.stations_choice = stations_selectionnees
-      st.session_state.preprocessed_data = None  # Invalide l’ancien preprocessing
   st.write("💡 Pb_Goulburn est une nouvelle station")
   # Générer un dictionnaire filtré identique en format à l’original
   dico_stations_DWO = {
@@ -1098,12 +1081,7 @@ if page == pages[2] :
   #Choix par radio bouton entre Logique d'entrainement temporelle ou non
   choix_preprocessing = st.selectbox("Choisir une logique d'entrainement",["---", "temporel", "non-temporel"])
 
-  if choix_preprocessing != st.session_state.logic_choice:
-    st.session_state.logic_choice = choix_preprocessing
-    st.session_state.model_choice = None
-    st.session_state.preprocessed_data = None
-
-  if st.session_state.logic_choice == "---": # Bloquer l'exécution si aucun modèle n'est sélectionné
+  if choix_preprocessing == "---": # Bloquer l'exécution si aucun modèle n'est sélectionné
       st.stop()
   #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   if choix_preprocessing == "temporel" :
@@ -1546,15 +1524,17 @@ if page == pages[3] :
   st.header("Conclusion")
   st.markdown("""
     **Conclusion sur les résultats :**
-    Bien que l'évaluation du modèle sur l'ancien jeu de données ait été prometteur (F1 score). On constate une difficulté à généraliser principalemment sur la classe positive minoritaire.
-    Et ce malgré les traitements effectuées (resapling, ou pondération dans les modeles).
+   
+               Bien que l'évaluation du modèle sur l'ancien jeu de données ait été prometteur (F1 score). On constate une difficulté à généraliser principalemment sur la classe positive minoritaire.
+    Et ce malgré les traitements effectuées (resampling, ou pondération dans les modeles).
     
-    La météo Australienne est complexe car des événèments rares mais récurrents (ex: El Nino) peuvent influencer les données de manière significative sans être pour atnat prévisible.
+    La météo en Australien est complexe car des événèments rares, récurrents, mais difficilement prédictible (El Nino) peuvent influencer les données de manière significative.
 
-
+              
     **Et avec plus de temps? :** 
-    Nous ne voyons pas d'autres enrichissement pour les données.
+    
+              Nous ne voyons pas d'autres enrichissement pour les données.
     Mais nous pourrions réentrainés le modèle en incluant des données récentes de 2024 pour ensuite prédire 2025.
               
-    En termes de modèles, nous avons essayé un RNN mais ses performances étaient inférieures à celles de l'XGBoost.""")
+    En termes de modèles, nous avons essayé un RNN mais ses performances étaient inférieures à celles de l'XGBoost. Peut-être que des graphs spatio-temporels pourraient apporter une valeur ajoutée?""")
   
