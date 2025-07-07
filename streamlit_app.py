@@ -1504,6 +1504,8 @@ if page == pages[2] :
   # Initialisation du slider du seuil
   if choix_preprocessing == "temporel" and  choix_model_temporel == "XGBoost Final":
     default_threshold = 0.38
+  elif choix_preprocessing == "temporel":
+    default_threshold = best_threshold
   else :
     default_threshold = 0.5 #revient à faire model.predict(X)
 
