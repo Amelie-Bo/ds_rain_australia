@@ -179,6 +179,11 @@ def afficher_resultats(model, X, y, label, seuil=0.5):
     report = classification_report(y, y_pred, output_dict=True)
     cm = confusion_matrix(y, y_pred)
 
+    # Conversion en pourcentages
+    cm_pct = cm / cm.sum() * 100
+    cm_pct = np.round(cm_pct, 1)  # arrondi à 1 chiffre
+    labels_pct = [[f"{v:.1f}%" for v in row] for row in cm_pct]
+
     st.markdown(f"### Résultats sur : **{label}**")
     col1, col2 = st.columns([2, 1])
 
@@ -186,10 +191,12 @@ def afficher_resultats(model, X, y, label, seuil=0.5):
         st.markdown("#### Rapport de classification")
         st.dataframe(pd.DataFrame(report).T.round(2))
 
-        st.markdown("#### Matrice de confusion")
-        fig_cm = px.imshow(cm, text_auto=True, color_continuous_scale="Blues")
-        fig_cm.update_layout(xaxis=dict(title="Prédit", tickvals=[0, 1], ticktext=["0", "1"]),
-                         yaxis=dict(title="Réel", tickvals=[0, 1], ticktext=["0", "1"]))
+        st.markdown("#### Matrice de confusion (en %)")
+        fig_cm = px.imshow(cm_pct, 
+                           text_auto=labels_pct, 
+                           color_continuous_scale="Blues", 
+                           labels=dict(x="Prédit", y="Réel", color="%"))
+        fig_cm.update_layout(xaxis_title="Prédit", yaxis_title="Réel")
         st.plotly_chart(fig_cm, use_container_width=True, key=f"plot_cm_{label}")
 
     with col2:
@@ -232,8 +239,13 @@ def affichage_resultas_donnees_actuelles (X_test, y, y_pred):
         st.dataframe(report_df)
 
     cm = confusion_matrix(y, y_pred)
+    # Conversion en pourcentages
+    cm_pct = cm / cm.sum() * 100
+    cm_pct = np.round(cm_pct, 1)  # arrondi à 1 chiffre
+    labels_pct = [[f"{v:.1f}%" for v in row] for row in cm_pct]
+
     st.subheader("Matrice de confusion")
-    fig_cm = px.imshow(cm, text_auto=True, color_continuous_scale="Blues")
+    fig_cm = px.imshow(cm, text_auto=labels_pct, color_continuous_scale="Blues")
     fig_cm.update_layout(xaxis=dict(title="Prédit", tickvals=[0, 1], ticktext=["0", "1"]),
                          yaxis=dict(title="Réel", tickvals=[0, 1], ticktext=["0", "1"]))
     st.plotly_chart(fig_cm, use_container_width=True)
