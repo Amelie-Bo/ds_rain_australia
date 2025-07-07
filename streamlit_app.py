@@ -1526,17 +1526,17 @@ if page == pages[3] :
   st.header("Conclusion")
   st.markdown("""
     **Conclusion sur les résultats :**
-   
-               Bien que l'évaluation du modèle sur l'ancien jeu de données ait été prometteur (F1 score). On constate une difficulté à généraliser principalemment sur la classe positive minoritaire.
-    Et ce malgré les traitements effectuées (resampling, ou pondération dans les modeles).
-    
-    La météo en Australien est complexe car des phénomènes rares, récurrents, mais difficilement prédictibles (cycle El Niño) peuvent influencer les données de manière significative.
+    - Rappel sur le dataset initial : variable cible désequilibrée, surreprésentation des stations des côtes Est et Sud-Est (et de leur climat), beaucoup de manquants (mois manquants, stations commecant tardivement)
+    - Choix d'un modèle précis et perfomant quel que soit le prepocessing choisi : XGB (F1 score 0.85 (0.67 en classe minoritaire) et AUC 0.89)
+    - Difficulté à généraliser sur des données récentes (quel que soit le modèle entraîné), surtout sur la classe minoritaire (malgré les traitements appliqués : resampling, pondération dans les modèles, etc.). :  
+ 
+    **Pistes d'explications :**
+    - La météo en Australien est complexe car des phénomènes rares, récurrents, mais difficilement prédictibles (cycle El Niño) peuvent influencer les données de manière significative.
+    - Il y a peut être des phénomènes dans les nouvelles données que le modèle n'a pas appris, car il a été entraîné sur des données de 2007 à 2017.
 
-              
+                 
     **Et avec plus de temps? :** 
-    
-              Nous ne voyons pas d'autres enrichissement pour les données.
-    Mais nous pourrions réentrainés le modèle en incluant des données récentes de 2024 pour ensuite prédire 2025.
-              
-    En termes de modèles, nous avons essayé un RNN mais ses performances étaient inférieures à celles de l'XGBoost. Peut-être que des graphs spatio-temporels pourraient apporter une valeur ajoutée?""")
+   - Nous ne voyons pas d'autres enrichissement pour les données.
+   - Mais nous pourrions réentrainés le modèle en incluant des données récentes de 2024 pour ensuite prédire 2025.
+   - En termes de modèles, nous avons essayé un RNN mais ses résultats étaient inférieures à celles de l'XGBoost : Peut-être que des graphs spatio-temporels pourraient apporter une valeur ajoutée?""")
   
