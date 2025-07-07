@@ -894,23 +894,12 @@ if page == "Comparaison des modèles":
 
 # -----------------------------
 # 0. Cache dans la page
-if "period_choice" not in st.session_state:
-    st.session_state.period_choice = None
-if "stations_choice" not in st.session_state:
-    st.session_state.stations_choice = None
-if "logic_choice" not in st.session_state:
-    st.session_state.logic_choice = None
-if "model_choice" not in st.session_state:
-    st.session_state.model_choice = None
-if "preprocessed_data" not in st.session_state:
-    st.session_state.preprocessed_data = None
 def reset_all():
-    for k in [
-        "period_choice", "stations_choice",
-        "logic_choice", "model_choice",
-        "preprocessed_data"
-    ]:
-        st.session_state[k] = None
+    st.session_state.period_choice = []
+    st.session_state.stations_choice = []
+    st.session_state.logic_choice = "---"
+    st.session_state.model_choice = "--- Sélectionner ---"
+    st.session_state.preprocessed_data = None
     st.experimental_rerun()
 # -----------------------------
 
@@ -1074,19 +1063,21 @@ if page == pages[2] :
   elif len(stations_supprimees) > 0:
       st.warning(f"Les stations suivantes ont été exclues car elles contiennent plus de 25% de données manquantes : {', '.join(stations_supprimees)}")
 
-  # === Fin du tron commun avec Florent ===
+  # === Fin du tronc commun avec Florent ===
   df_X_y_test = df_conso_station.copy()
 
   ## 2.3 Ajout de la latitude et de la longitude
-  dico_charge = load_pickle("dico_station_geo.pkl") #ecart avec localisations_gps.csv : ajout des coordonnées de Goulburn
-  df_dico_station_geo = pd.DataFrame.from_dict(dico_charge, orient="index",columns=["Lat", "Lon"])
-  df_dico_station_geo.columns = ["Latitude", "Longitude"]
-  df_X_y_test = df_X_y_test.merge(right=df_dico_station_geo, left_on="Location", right_index=True, how="left")
+  #dico_charge = load_pickle("dico_station_geo.pkl") #ecart avec localisations_gps.csv : ajout des coordonnées de Goulburn
+  #df_dico_station_geo = pd.DataFrame.from_dict(dico_charge, orient="index",columns=["Lat", "Lon"])
+  #df_dico_station_geo.columns = ["Latitude", "Longitude"]
+  #df_X_y_test = df_X_y_test.merge(right=df_dico_station_geo, left_on="Location", right_index=True, how="left")
+  gps = pd.read_csv(os.path.join(SCALER_PATH, "localisations_gps.csv"))
+  df_X_y_test = df_X_y_test.merge(gps, on="Location", how="left")
 
-  ## 2.4 Ajout du climat
-  climat_mapping = pd.read_csv(os.path.join(SCALER_PATH, "climat_mapping.csv"))#/!\
-  climat_mapping_series = climat_mapping.set_index("Location")["Climate"]
-  df_X_y_test['Climate'] = df_X_y_test["Location"].map(climat_mapping_series) #pour chaque valeur de df.Location, on récupère la valeur correspondante dans climat_mapping
+  ## 2.4 Ajout du climat (inutile Florent le traite dans sa partie)
+  # climat_mapping = pd.read_csv(os.path.join(SCALER_PATH, "climat_mapping.csv"))#/!\
+  # climat_mapping_series = climat_mapping.set_index("Location")["Climate"]
+  # df_X_y_test['Climate'] = df_X_y_test["Location"].map(climat_mapping_series) #pour chaque valeur de df.Location, on récupère la valeur correspondante dans climat_mapping
 
   ## 2.5 Date, Saison
   df_X_y_test["Date"]=pd.to_datetime(df_X_y_test["Date"], format = "%Y-%m-%d")
@@ -1264,7 +1255,8 @@ if page == pages[2] :
     def preprocessing_Florent(df):
         df["Date"] = pd.to_datetime(df["Date"])
         gps_mapping = pd.read_csv(os.path.join(SCALER_PATH, "localisations_gps.csv"))
-        df = df.merge(climat_mapping, on="Location", how="left").merge(gps_mapping, on="Location", how="left")
+        climat = pd.read_csv(os.path.join(SCALER_PATH, "climat_mapping.csv"))
+        df = df.merge(climat, on="Location", how="left").merge(gps_mapping, on="Location", how="left")
 
         df["RainTomorrow"] = df["RainTomorrow"].map({"Yes": 1, "No": 0})
         df["RainToday"] = df["RainToday"].map({"Yes": 1, "No": 0})
@@ -1315,7 +1307,8 @@ if page == pages[2] :
         st.stop()
 
     #### 3.2.A.1 Suppresion des features avec trop de manquants
-    df_X_y_test = df_X_y_test.drop(["RainToday","Saison","Climate"], axis = 1)
+    # df_X_y_test = df_X_y_test.drop(["RainToday","Saison","Climate"], axis = 1)
+    df_X_y_test = df_X_y_test.drop(["RainToday","Saison"], axis = 1)
 
     #### 3.2.A.2 Complétions autorisées
     df_X_y_test["Pressure3pm"]=df_X_y_test["Pressure3pm"].fillna(df_X_y_test["Pressure9am"])
@@ -1513,15 +1506,7 @@ if page == pages[2] :
     # Chargement et application des scalers (en paramètre le df obtenu avant)
     X_test_temporel  = load_and_apply_scalers(X_test_fe,  scaler_name = "scalers.joblib")
 
-    #Aperçu des features en fin de preprocessing
-    st.write("Aperçu des features en fin de preprocessing")
-    st.dataframe(X_test_temporel.head(3))
-
     #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    ### 3.2.B Modelisation Amelie------------------------------------------------------------------------------------------------------------------------------------------------
-    do_predict = st.checkbox("Lancer prédiction")
-    if not do_predict:
-        st.stop()
 
     # Chargement des objets
     modele_non_temporel = load_model_non_temporel(choix_model_non_temporel)
