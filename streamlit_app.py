@@ -900,7 +900,7 @@ def reset_all():
     st.session_state.logic_choice = "---"
     st.session_state.model_choice = "--- Sélectionner ---"
     st.session_state.preprocessed_data = None
-    st.experimental_rerun()
+    st.rerun()
 # -----------------------------
 
 if page == pages[2] :
@@ -1067,10 +1067,6 @@ if page == pages[2] :
   df_X_y_test = df_conso_station.copy()
 
   ## 2.3 Ajout de la latitude et de la longitude
-  #dico_charge = load_pickle("dico_station_geo.pkl") #ecart avec localisations_gps.csv : ajout des coordonnées de Goulburn
-  #df_dico_station_geo = pd.DataFrame.from_dict(dico_charge, orient="index",columns=["Lat", "Lon"])
-  #df_dico_station_geo.columns = ["Latitude", "Longitude"]
-  #df_X_y_test = df_X_y_test.merge(right=df_dico_station_geo, left_on="Location", right_index=True, how="left")
   gps = pd.read_csv(os.path.join(SCALER_PATH, "localisations_gps.csv"))
   df_X_y_test = df_X_y_test.merge(gps, on="Location", how="left")
 
@@ -1548,3 +1544,17 @@ if page == pages[2] :
 
 if page == pages[3] :
   st.header("Conclusion")
+  st.markdown("""
+    **Conclusion sur les résultats :**
+    Bien que l'évaluation du modèle sur l'ancien jeu de données ait été prometteur (F1 score). On constate une difficulté à généraliser principalemment sur la classe positive minoritaire.
+    Et ce malgré les traitements effectuées (resapling, ou pondération dans les modeles).
+    
+    La météo Australienne est complexe car des événèments rares mais récurrents (ex: El Nino) peuvent influencer les données de manière significative sans être pour atnat prévisible.
+
+
+    **Et avec plus de temps? :** 
+    Nous ne voyons pas d'autres enrichissement pour les données.
+    Mais nous pourrions réentrainés le modèle en incluant des données récentes de 2024 pour ensuite prédire 2025.
+              
+    En termes de modèles, nous avons essayé un RNN mais ses performances étaient inférieures à celles de l'XGBoost.""")
+  
