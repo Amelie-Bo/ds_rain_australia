@@ -1504,7 +1504,7 @@ if page == pages[2] :
   # Initialisation du slider du seuil
   if choix_preprocessing == "temporel" and  choix_model_temporel == "XGBoost Final":
     default_threshold = 0.38
-  elif choix_preprocessing == "temporel":
+  elif choix_preprocessing == "non-temporel":
     default_threshold = best_threshold
   else :
     default_threshold = 0.5 #revient à faire model.predict(X)
@@ -1530,7 +1530,7 @@ if page == pages[3] :
                Bien que l'évaluation du modèle sur l'ancien jeu de données ait été prometteur (F1 score). On constate une difficulté à généraliser principalemment sur la classe positive minoritaire.
     Et ce malgré les traitements effectuées (resampling, ou pondération dans les modeles).
     
-    La météo en Australien est complexe car des événèments rares, récurrents, mais difficilement prédictible (El Nino) peuvent influencer les données de manière significative.
+    La météo en Australien est complexe car des phénomènes rares, récurrents, mais difficilement prédictibles (cycle El Niño) peuvent influencer les données de manière significative.
 
               
     **Et avec plus de temps? :** 
