@@ -247,7 +247,8 @@ def affichage_resultas_donnees_actuelles (X_test, y, y_pred):
     labels_pct = [[f"{v:.1f}%" for v in row] for row in cm_pct]
 
     st.subheader("Matrice de confusion")
-    fig_cm = px.imshow(cm, text=labels_pct, text_auto=True, color_continuous_scale="Blues")
+    fig_cm = px.imshow(cm, text_auto=True, color_continuous_scale="Blues")
+    fig_cm.update_traces(text=labels_pct, texttemplate="%{text}")
     fig_cm.update_layout(xaxis=dict(title="Prédit", tickvals=[0, 1], ticktext=["0", "1"]),
                          yaxis=dict(title="Réel", tickvals=[0, 1], ticktext=["0", "1"]))
     st.plotly_chart(fig_cm, use_container_width=True)
