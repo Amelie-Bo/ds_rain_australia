@@ -1354,7 +1354,7 @@ if page == pages[2] :
                 mask_no_wind = is_exact_zero & mask_dir_missing
                 # d) Créer l’indicateur NoWind_<col_speed> (1 si vitesse == 0)
                 #    On met 1 si vitesse = 0, même si direction présente ou non.
-                df[f"NoWind_{col_speed}"] = is_exact_zero.astype(int)
+                df[f"NoWind_{col_speed}"] = is_exact_zero.astype("Int64")
             else:
                 # Pour WindGust, pas de “pas de vent” → on n’utilise pas NoWind
                 is_exact_zero = pd.Series(False, index=df.index)
