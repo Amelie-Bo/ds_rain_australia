@@ -193,9 +193,11 @@ def afficher_resultats(model, X, y, label, seuil=0.5):
 
         st.markdown("#### Matrice de confusion (en %)")
         fig_cm = px.imshow(cm_pct, 
-                           text=labels_pct, text_auto=True, 
+                           text_auto=True, 
                            color_continuous_scale="Blues", 
                            labels=dict(x="Prédit", y="Réel", color="%"))
+        # Affiche les valeurs custom
+        fig_cm.update_traces(text=labels_pct, texttemplate="%{text}")
         fig_cm.update_layout(xaxis_title="Prédit", yaxis_title="Réel")
         st.plotly_chart(fig_cm, use_container_width=True, key=f"plot_cm_{label}")
 
