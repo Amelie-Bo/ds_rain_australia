@@ -1546,12 +1546,12 @@ if page == pages[3] :
     - Difficulté à généraliser sur des données récentes (quel que soit le modèle entraîné), surtout sur la classe minoritaire (malgré les traitements appliqués : resampling, pondération dans les modèles, etc.). :  
  
     **Pistes d'explications :**
-    - La météo en Australien est complexe car des phénomènes rares, récurrents, mais difficilement prédictibles (cycle El Niño) peuvent influencer les données de manière significative.
+    - La météo en Australie est complexe car des phénomènes rares, récurrents, mais difficilement prédictibles (cycle El Niño) peuvent influencer les données de manière significative.
     - Il y a peut être des phénomènes dans les nouvelles données que le modèle n'a pas appris, car il a été entraîné sur des données de 2007 à 2017.
 
                  
     **Et avec plus de temps? :** 
    - Nous ne voyons pas d'autres enrichissement pour les données.
    - Mais nous pourrions réentrainés le modèle en incluant des données récentes de 2024 pour ensuite prédire 2025.
-   - En termes de modèles, nous avons essayé un RNN mais ses résultats étaient inférieures à celles de l'XGBoost : Peut-être que des graphs spatio-temporels pourraient apporter une valeur ajoutée?""")
+   - En termes de modèles, nous avons essayé un RNN mais ses résultats étaient inférieures à celles de l'XGBoost. Il pourrait être intéressant de tester des graphs spatio-temporels, ou un ClassifierChain""")
   
